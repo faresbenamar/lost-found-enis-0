@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1092015186513",
+    "project_id": "lost-found-enis",
+    "storage_bucket": "lost-found-enis.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092015186513:android:c938b57a1ca69b1dab8e70",
+        "android_client_info": {
+          "package_name": "com.example.lost_found_enis"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0wnAx0ABkep-fuViXJur6Ux8VzF5Z6fM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
