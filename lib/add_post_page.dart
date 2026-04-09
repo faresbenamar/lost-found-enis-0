@@ -1,4 +1,4 @@
-  import 'dart:convert';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,10 +19,20 @@ class _AddPostPageState extends State<AddPostPage> {
   final extraContactController = TextEditingController();
 
   String type = 'lost';
+  String category = 'electronics';
   Uint8List? imageBytes;
   bool isLoading = false;
   String? userEmail;
   List<String> extraContacts = [];
+
+  final List<String> categories = [
+    'electronics',
+    'clothes',
+    'money',
+    'keys',
+    'wallets',
+    'others',
+  ];
 
   @override
   void initState() {
@@ -55,7 +65,9 @@ class _AddPostPageState extends State<AddPostPage> {
     final email = extraContactController.text.trim();
     if (!email.endsWith('@enis.tn')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Extra contact must also end with @enis.tn')),
+        const SnackBar(
+          content: Text('Extra contact must also end with @enis.tn'),
+        ),
       );
       return;
     }
@@ -66,9 +78,9 @@ class _AddPostPageState extends State<AddPostPage> {
       return;
     }
     if (extraContacts.contains(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email already added')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Email already added')));
       return;
     }
     setState(() {
@@ -79,15 +91,15 @@ class _AddPostPageState extends State<AddPostPage> {
 
   Future<void> submit() async {
     if (imageBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please pick an image')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please pick an image')));
       return;
     }
     if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a title')));
       return;
     }
 
@@ -97,6 +109,7 @@ class _AddPostPageState extends State<AddPostPage> {
 
     await FirebaseFirestore.instance.collection('posts').add({
       'type': type,
+      'category': category,
       'title': titleController.text.trim(),
       'description': descriptionController.text.trim(),
       'place': placeController.text.trim(),
@@ -120,64 +133,175 @@ class _AddPostPageState extends State<AddPostPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Type selector
-            DropdownButton<String>(
-              value: type,
-              items: const [
-                DropdownMenuItem(value: 'lost', child: Text('Lost')),
-                DropdownMenuItem(value: 'found', child: Text('Found')),
+            const Text('Type', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => type = 'lost'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: type == 'lost'
+                            ? Colors.red[400]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Lost',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: type == 'lost' ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => type = 'found'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: type == 'found'
+                            ? Colors.green[400]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Found',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: type == 'found'
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
-              onChanged: (v) => setState(() => type = v!),
             ),
+
+            const SizedBox(height: 16),
+
+            // Category selector
+            const Text(
+              'Category',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: categories.map((c) {
+                final isSelected = category == c;
+                return GestureDetector(
+                  onTap: () => setState(() => category = c),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF1565C0)
+                          : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      c[0].toUpperCase() + c.substring(1),
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: 16),
 
             // Title
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: const InputDecoration(
+                labelText: 'Title',
+                prefixIcon: Icon(Icons.title, color: Color(0xFF1565C0)),
+              ),
             ),
+            const SizedBox(height: 12),
 
             // Description
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                prefixIcon: Icon(Icons.description, color: Color(0xFF1565C0)),
+              ),
             ),
+            const SizedBox(height: 12),
 
             // Place
             TextField(
               controller: placeController,
-              decoration: const InputDecoration(labelText: 'Place'),
+              decoration: const InputDecoration(
+                labelText: 'Place',
+                prefixIcon: Icon(Icons.location_on, color: Color(0xFF1565C0)),
+              ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Owner email display
-            const Text('Owner Contact',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
+            // Owner email
+            const Text(
+              'Owner Contact',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF1565C0).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF1565C0).withOpacity(0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.person, color: Colors.blue),
+                  const Icon(Icons.person, color: Color(0xFF1565C0)),
                   const SizedBox(width: 8),
-                  Text(userEmail ?? '',
-                      style: const TextStyle(color: Colors.blue)),
+                  Text(
+                    userEmail ?? '',
+                    style: const TextStyle(color: Color(0xFF1565C0)),
+                  ),
                   const Spacer(),
-                  const Text('You',
-                      style:
-                          TextStyle(color: Colors.grey, fontSize: 12)),
+                  const Text(
+                    'You',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Extra contacts
-            const Text('Extra Contacts (optional)',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Extra Contacts (optional)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -186,7 +310,7 @@ class _AddPostPageState extends State<AddPostPage> {
                     controller: extraContactController,
                     decoration: const InputDecoration(
                       labelText: 'Add contact (@enis.tn)',
-                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email, color: Color(0xFF1565C0)),
                     ),
                   ),
                 ),
@@ -200,35 +324,39 @@ class _AddPostPageState extends State<AddPostPage> {
 
             const SizedBox(height: 8),
 
-            // Extra contacts list
             if (extraContacts.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              ...extraContacts.map((email) => Card(
-                    child: ListTile(
-                      leading:
-                          const Icon(Icons.email, color: Colors.green),
-                      title: Text(email),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle,
-                            color: Colors.red),
-                        onPressed: () {
-                          setState(() => extraContacts.remove(email));
-                        },
-                      ),
+              ...extraContacts.map(
+                (email) => Card(
+                  margin: const EdgeInsets.only(bottom: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.email, color: Colors.green),
+                    title: Text(email),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.remove_circle, color: Colors.red),
+                      onPressed: () {
+                        setState(() => extraContacts.remove(email));
+                      },
                     ),
-                  )),
+                  ),
+                ),
+              ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Image preview
             if (imageBytes != null) ...[
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(imageBytes!,
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover),
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  imageBytes!,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(height: 8),
             ],
@@ -239,12 +367,11 @@ class _AddPostPageState extends State<AddPostPage> {
               child: ElevatedButton.icon(
                 onPressed: pickImage,
                 icon: const Icon(Icons.image),
-                label: Text(
-                    imageBytes == null ? 'Pick Image' : 'Change Image'),
+                label: Text(imageBytes == null ? 'Pick Image' : 'Change Image'),
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             // Submit button
             SizedBox(
@@ -253,7 +380,16 @@ class _AddPostPageState extends State<AddPostPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: submit,
-                      child: const Text('Submit'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[600],
+                      ),
+                      child: const Text(
+                        'Submit Post',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
             ),
           ],

@@ -100,7 +100,7 @@ class PostDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image — tap to open fullscreen
+            // Image
             if (imageBytes != null)
               GestureDetector(
                 onTap: () => openFullImage(context, imageBytes!),
@@ -108,7 +108,7 @@ class PostDetailsPage extends StatelessWidget {
                   alignment: Alignment.bottomRight,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       child: Image.memory(
                         imageBytes,
                         height: 250,
@@ -137,10 +137,10 @@ class PostDetailsPage extends StatelessWidget {
 
             // Type badge
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: postType == 'lost' ? Colors.red[50] : Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -163,68 +163,135 @@ class PostDetailsPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Title
-            const Text(
-              'Title',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-            ),
-            Text(data['title'] ?? '-', style: const TextStyle(fontSize: 18)),
-            const Divider(),
-
-            // Description
-            const Text(
-              'Description',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-            ),
-            Text(
-              data['description'] ?? '-',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const Divider(),
-
-            // Place
-            const Text(
-              'Place',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-            ),
-            Text(data['place'] ?? '-', style: const TextStyle(fontSize: 16)),
-            const Divider(),
-
-            // Contacts
-            const Text(
-              'Contacts',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-            ),
-            const SizedBox(height: 4),
-            ...contacts.map(
-              (email) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
+            // Info card
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.email, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(email, style: const TextStyle(fontSize: 16)),
-                    if (email == data['ownerEmail']) ...[
-                      const SizedBox(width: 8),
-                      const Text(
-                        '(owner)',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
+                    _infoRow(Icons.title, 'Title', data['title'] ?? '-'),
+                    const Divider(),
+                    _infoRow(
+                      Icons.description,
+                      'Description',
+                      data['description'] ?? '-',
+                    ),
+                    const Divider(),
+                    _infoRow(Icons.location_on, 'Place', data['place'] ?? '-'),
+                    const Divider(),
+                    _infoRow(
+                      Icons.calendar_today,
+                      'Date Posted',
+                      formattedDate,
+                    ),
                   ],
                 ),
               ),
             ),
-            const Divider(),
 
-            // Date
-            const Text(
-              'Date Posted',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            const SizedBox(height: 16),
+
+            // Contacts card
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Contacts',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color(0xFF1565C0),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...contacts.map(
+                      (email) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.email,
+                              size: 18,
+                              color: Color(0xFF1565C0),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                email,
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                            ),
+                            if (email == data['ownerEmail'])
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF1565C0,
+                                  ).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'owner',
+                                  style: TextStyle(
+                                    color: Color(0xFF1565C0),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Text(formattedDate, style: const TextStyle(fontSize: 16)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF1565C0)),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
